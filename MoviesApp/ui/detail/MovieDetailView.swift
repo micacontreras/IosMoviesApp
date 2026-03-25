@@ -26,12 +26,41 @@ struct MovieDetailView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
 
+                if !vm.movie.releaseDate.isEmpty {
+                    Text(vm.movie.releaseDate)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
                 if vm.movie.voteAverage > 0 {
-                    HStack(spacing: 6) {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
+                    HStack(spacing: 4) {
+                        let starRating = vm.movie.voteAverage / 2.0
+                        ForEach(1...5, id: \.self) { index in
+                            let fill = starRating - Double(index - 1)
+                            Image(systemName: fill >= 1.0 ? "star.fill" : fill >= 0.5 ? "star.leadinghalf.filled" : "star")
+                                .foregroundColor(.yellow)
+                                .font(.body)
+                        }
                         Text(String(format: "%.1f", vm.movie.voteAverage))
-                            .font(.headline)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                let genres = GenreMap.genreNames(for: vm.movie.genreIds)
+                if !genres.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(genres, id: \.self) { name in
+                                Text(name)
+                                    .font(.caption)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color.blue.opacity(0.15))
+                                    .clipShape(Capsule())
+                            }
+                        }
+                        .padding(.horizontal)
                     }
                 }
 

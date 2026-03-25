@@ -11,8 +11,8 @@ class MovieRepository: ObservableObject, MovieRepositoryProtocol {
         self.favorites = favStore.loadFavorites()
     }
 
-    func getPopular() async throws -> [Movie] {
-        try await api.fetchPopular()
+    func getMovies(category: MovieCategory, page: Int = 1) async throws -> MovieListResponse {
+        try await api.fetchMovies(category: category, page: page)
     }
 
     func search(query: String) async throws -> [Movie] {

@@ -1,15 +1,17 @@
 import Foundation
 
 protocol MovieAPIService {
-    func fetchPopular() async throws -> [Movie]
+    func fetchMovies(category: MovieCategory, page: Int) async throws -> MovieListResponse
     func search(query: String) async throws -> [Movie]
 }
 
 struct TMDBAPIService: MovieAPIService {
     let api: TMDBAPI
 
-    func fetchPopular() async throws -> [Movie] {
-        guard let url = api.makeURL(path: "/movie/popular") else { return [] }
+    func fetchMovies(category: MovieCategory, page: Int = 1) async throws -> MovieListResponse {
+        guard let url = api.makeURL(path: category.apiPath, query: [
+            URLQueryItem(name: "page", value: String(page))
+        ]) else { return MovieListResponse(results: [], page: 0, totalPages: 0) }
         return try await fetchWithRetry(url: url)
     }
 
@@ -17,7 +19,7 @@ struct TMDBAPIService: MovieAPIService {
         guard let url = api.makeURL(path: "/search/movie", query: [
             URLQueryItem(name: "query", value: query)
         ]) else { return [] }
-        return try await fetchWithRetry(url: url)
+        return try await fetchWithRetry(url: url).results
     }
 
     private func makeSession() -> URLSession {
@@ -27,21 +29,19 @@ struct TMDBAPIService: MovieAPIService {
         return URLSession(configuration: config)
     }
 
-    private func fetchWithRetry(url: URL, maxRetries: Int = 3) async throws -> [Movie] {
+    private func fetchWithRetry(url: URL, maxRetries: Int = 3) async throws -> MovieListResponse {
         var lastError: Error?
         for attempt in 0...maxRetries {
             if attempt > 0 {
-                // Increase delay between retries: 1s, 2s, 3s
                 try await Task.sleep(for: .seconds(attempt))
             }
             guard !Task.isCancelled else { throw CancellationError() }
             do {
-                // Create a fresh session per attempt to avoid reusing broken QUIC connections
                 let session = makeSession()
                 var request = URLRequest(url: url)
                 request.assumesHTTP3Capable = false
                 let (data, _) = try await session.data(for: request)
-                return try JSONDecoder().decode(MovieListResponse.self, from: data).results
+                return try JSONDecoder().decode(MovieListResponse.self, from: data)
             } catch {
                 lastError = error
                 if Task.isCancelled { throw CancellationError() }
@@ -54,4 +54,11 @@ struct TMDBAPIService: MovieAPIService {
 
 struct MovieListResponse: Codable {
     let results: [Movie]
+    let page: Int
+    let totalPages: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case results, page
+        case totalPages = "total_pages"
+    }
 }

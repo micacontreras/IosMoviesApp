@@ -7,6 +7,7 @@ struct Movie: Identifiable, Codable, Equatable, Hashable {
     let overview: String
     let releaseDate: String
     let voteAverage: Double
+    let genreIds: [Int]?
 
     var posterURL: URL? {
         guard let p = posterPath else { return nil }
@@ -19,5 +20,6 @@ struct Movie: Identifiable, Codable, Equatable, Hashable {
         case overview
         case releaseDate = "release_date"
         case voteAverage = "vote_average"
+        case genreIds = "genre_ids"
     }
 }

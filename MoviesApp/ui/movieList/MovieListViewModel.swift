@@ -8,28 +8,67 @@ class MovieListViewModel: ObservableObject {
     @Published var isSearching = false
     @Published var hasSearched = false
     @Published var loadError = false
+    @Published var selectedCategory: MovieCategory = .popular
+    @Published var isLoadingMore = false
 
     let repo: MovieRepositoryProtocol
-    private var popularMovies: [Movie] = []
+    private var cachedMovies: [Movie] = []
     private var searchTask: Task<Void, Never>?
+    private var currentPage = 0
+    private var totalPages = 1
 
     init(repo: MovieRepositoryProtocol) {
         self.repo = repo
     }
 
-    func loadPopular() async {
-        loadError = false
-        isLoading = true
-        defer { isLoading = false }
+    func loadMovies() async {
+        currentPage = 0
+        totalPages = 1
+        cachedMovies = []
+        await loadNextPage()
+    }
+
+    func loadNextPageIfNeeded(currentMovie: Movie) async {
+        guard !isSearching,
+              !isLoadingMore,
+              currentPage < totalPages,
+              let index = movies.firstIndex(of: currentMovie),
+              index >= movies.count - 3 else { return }
+        await loadNextPage()
+    }
+
+    private func loadNextPage() async {
+        let isFirstPage = currentPage == 0
+        if isFirstPage {
+            loadError = false
+            isLoading = true
+        }
+        isLoadingMore = true
+        defer {
+            if isFirstPage { isLoading = false }
+            isLoadingMore = false
+        }
+
         do {
-            popularMovies = try await repo.getPopular()
+            let response = try await repo.getMovies(category: selectedCategory, page: currentPage + 1)
+            currentPage = response.page
+            totalPages = response.totalPages
+            let newMovies = response.results.filter { movie in
+                !cachedMovies.contains { $0.id == movie.id }
+            }
+            cachedMovies.append(contentsOf: newMovies)
             if !isSearching {
-                movies = popularMovies
+                movies = cachedMovies
             }
         } catch {
             print("Error: \(error)")
-            loadError = true
+            if isFirstPage { loadError = true }
         }
+    }
+
+    func onCategoryChanged(_ category: MovieCategory) {
+        selectedCategory = category
+        Task { await loadMovies() }
     }
 
     func onSearchActiveChanged(_ active: Bool) {
@@ -37,7 +76,7 @@ class MovieListViewModel: ObservableObject {
         if !active {
             searchTask?.cancel()
             query = ""
-            movies = popularMovies
+            movies = cachedMovies
             hasSearched = false
         } else {
             movies = []
