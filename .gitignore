@@ -1,0 +1,19 @@
+# Xcode user data
+xcuserdata/
+*.xcuserdatad/
+
+# Build products
+build/
+DerivedData/
+
+# OS files
+.DS_Store
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+
+# CocoaPods (if used)
+Pods/
