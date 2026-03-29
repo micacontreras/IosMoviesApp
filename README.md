@@ -6,7 +6,7 @@ Aplicacion iOS para explorar peliculas populares, buscar titulos y guardar favor
 
 | Peliculas | Detalle | Favoritas | Busqueda |
 |-----------|---------|-----------|----------|
-| *(screenshot)* | *(screenshot)* | *(screenshot)* | *(screenshot)* |
+| <img src="https://github.com/user-attachments/assets/58627829-a146-436a-8325-6b9a046a7780" width="250"/> | <img src="https://github.com/user-attachments/assets/d6db6aea-433d-4b5d-8efd-e6f075fcebeb" width="250"/> | <img src="https://github.com/user-attachments/assets/253da78f-b304-4607-adc8-bf8d23701ebc" width="250"/> | <img src="https://github.com/user-attachments/assets/93fac017-b1db-4de3-889b-0e4ea0025ef9" width="250"/> |
 
 ## Funcionalidades
 
