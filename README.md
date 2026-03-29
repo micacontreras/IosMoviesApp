@@ -10,13 +10,16 @@ Aplicacion iOS para explorar peliculas populares, buscar titulos y guardar favor
 
 ## Funcionalidades
 
-- **Listado de peliculas populares** con scroll infinito y pull-to-refresh
+- **Listado de peliculas populares** con poster, rating y scroll infinito (paginacion automatica)
+- **Categorias** — Populares, Mejor valoradas, Proximamente y En cartelera
+- **Pull-to-refresh** para recargar la categoria actual
 - **Busqueda en tiempo real** con debounce (300ms) y minimo 3 caracteres
-- **Detalle de pelicula** con poster, rating, sinopsis y boton de favorito
-- **Favoritas** en grid de 2 columnas con opcion de eliminar desde la lista
+- **Detalle de pelicula** con poster, estrellas visuales, fecha de estreno, generos y sinopsis
+- **Favoritas** en grid de 2 columnas con eliminacion directa, navegacion al detalle y ordenamiento (fecha, nombre, rating)
 - **Persistencia local** de favoritos usando UserDefaults (sin llamadas extra a la API)
 - **Cache de imagenes** con NSCache para carga eficiente de posters
 - **Manejo de errores de red** con reintentos automaticos y boton de reintentar
+- **Unit tests** con 20 tests cubriendo Repository, ViewModel, GenreMap y MovieCategory
 
 ## Arquitectura
 
@@ -29,6 +32,8 @@ MoviesApp/
 │   │   └── MovieAPIService.swift        # Servicio HTTP con retry logic
 │   ├── models/
 │   │   ├── MovieDto.swift               # Modelo Movie (Codable, Hashable)
+│   │   ├── MovieCategory.swift          # Enum de categorias con paths de API
+│   │   ├── GenreMap.swift               # Mapeo de generos a nombres en español
 │   │   └── TMDBAPI.swift                # Configuracion de endpoints TMDB
 │   └── storage/
 │       └── FavoritesStore.swift         # Persistencia en UserDefaults
@@ -70,6 +75,7 @@ View → ViewModel → Repository → APIService / FavoritesStore
 | Networking | URLSession + async/await |
 | Persistencia | UserDefaults + JSONEncoder |
 | Cache de imagenes | NSCache |
+| Testing | Swift Testing framework |
 | API | TMDB API v3 |
 | Minimo iOS | 17.0 |
 
@@ -98,8 +104,10 @@ Este proyecto fue creado como ejercicio de aprendizaje de desarrollo iOS, cubrie
 - Networking asincrono con `async/await` y manejo de errores
 - Busqueda con `.searchable` y `@Environment(\.isSearching)`
 - Layouts con `LazyVGrid` y `ScrollView`
+- Paginacion infinita con deteccion de scroll
 - Persistencia local con `UserDefaults`
 - Cache de imagenes custom reemplazando `AsyncImage`
+- Unit testing con Swift Testing framework y mocks
 
 ## Licencia
 
